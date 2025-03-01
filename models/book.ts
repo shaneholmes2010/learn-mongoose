@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model, FilterQuery } from 'mongoose';
 import Author, { IAuthor } from './author';
 import Genre, { IGenre } from './genre';
+import BookInstance from './bookinstance';
 
 /**
  * A type that represents a book document in the books collection.
@@ -32,10 +33,12 @@ export interface IBook extends Document {
  * @extends Model
  * @property {Function} getAllBooksWithAuthors - A function to get all books with authors.
  * @property {Function} getBookCount - A function to get the count of books.
+ * @property {Function} getBookDtls - A function to get the details of a book.
  */
 interface IBookModel extends Model<IBook> {
   getAllBooksWithAuthors(projectionOpts: string, sortOpts?: { [key: string]: 1 | -1 }): Promise<IBook[]>;
   getBookCount(fitler?: FilterQuery<IBook>): Promise<number>;
+  getBookDtls(bookID: string): Promise<{}>;
 }
 
 /**
@@ -95,6 +98,16 @@ BookSchema.statics.getBookCount = async function (filter?: FilterQuery<IBook>): 
 BookSchema.methods.saveBookOfExistingAuthorAndGenre = async function (author_family_name: string, author_first_name: string, genre_name: string, title: string): Promise<IBook> {
   const authorId = await Author.getAuthorIdByName(author_family_name, author_first_name);
   const genreId = await Genre.getGenreIdByName(genre_name);
+
+  console.log('family name: ', author_family_name);
+  console.log('first name: ', author_first_name);
+  console.log('genre na,e: ', genre_name);
+  console.log('title: ', title);
+
+  console.log('authorId: ', authorId);
+  console.log('genreId: ', genreId);
+  console.log('title: ', title);
+
   if(!authorId || !genreId) {
     throw new Error('Author or genre not found');
   }
@@ -104,6 +117,20 @@ BookSchema.methods.saveBookOfExistingAuthorAndGenre = async function (author_fam
   this.author = authorId;
   this.genre = [genreId];
   return await this.save();  
+}
+
+BookSchema.statics.getBookDtls = async function (bookID: string): Promise<{}> {
+ 
+  const book = await Book.findOne({ _id: bookID });
+
+  const bookInstance = await BookInstance.find({ book: book });
+
+  const data = {
+    title: book?.title ,
+    author: book?.author.name,
+    copies: bookInstance
+  }
+  return data;
 }
 
 /**

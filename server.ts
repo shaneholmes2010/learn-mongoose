@@ -6,6 +6,8 @@ import availableRouter from './pages/books_status';
 import bookRouter from './pages/books';
 import authorRouter from './pages/authors';
 import createBookRouter from './pages/create_book';
+import bookDetailsRouter from './pages/book_dtls';
+import newBookRouter from './pages/new_book';
 
 // Create express app
 const app = express();
@@ -45,3 +47,8 @@ app.use('/books', bookRouter);
 app.use('/authors', authorRouter);
 
 app.use('/newbook', createBookRouter);
+
+app.use('/book_dtls', bookDetailsRouter);
+
+app.use('/newbook', newBookRouter);
+
